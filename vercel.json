@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "name": "bpn-clinic-form",
+  "builds": [
+    {
+      "src": "bpn_clinic_form.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/bpn_clinic_form.html"
+    }
+  ]
+}

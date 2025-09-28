@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BPN Clinic - Daily Visit Log</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .required {
+            color: #e74c3c;
+        }
+
+        input, select, textarea {
+            padding: 12px 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .medication-section, .referral-section {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: "📋";
+            margin-right: 10px;
+            font-size: 1.3rem;
+        }
+
+        .submit-section {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #f1f5f9;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-clear {
+            background: #6c757d;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-right: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-clear:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+            display: none;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .time-date-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .suggestions-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e1e8ed;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .suggestion-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+            transition: background-color 0.2s ease;
+        }
+
+        .suggestion-item:hover, .suggestion-item.highlighted {
+            background-color: #667eea;
+            color: white;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-emp-no {
+            font-weight: 600;
+            color: inherit;
+        }
+
+        .suggestion-name {
+            color: inherit;
+            margin-top: 2px;
+        }
+
+        .suggestion-dept {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+
+        .employee-info {
+            margin-top: 10px;
+            padding: 12px;
+            background: #e8f4fd;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            display: none;
+        }
+
+        .employee-info.show {
+            display: block;
+        }
+
+        .employee-info h4 {
+            margin: 0 0 8px 0;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .employee-info p {
+            margin: 4px 0;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .auto-filled {
+            background-color: #e8f4fd !important;
+            border-color: #667eea !important;
+        }
+
+        .manual-entry {
+            background-color: #fff3cd !important;
+            border-color: #ffc107 !important;
+        }
+
+        .not-found-notice {
+            margin-top: 10px;
+            padding: 10px;
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: #856404;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .time-date-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>BPN CLINIC VISIT LOG</h1>
+        </div>
+        
+        <div class="form-container">
+            <div class="success-message" id="successMessage">
+                ✅ Visit record saved successfully! Form cleared for next entry.
+            </div>
+            
+            <form id="clinicForm">
+                <div class="form-grid">
+                    <div class="time-date-row full-width">
+                        <div class="form-group">
+                            <label for="visitDate">Visit Date <span class="required">*</span></label>
+                            <input type="date" id="visitDate" name="visitDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="visitTime">Visit Time <span class="required">*</span></label>
+                            <input type="time" id="visitTime" name="visitTime" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="employeeId">Employee ID <span class="required">*</span></label>
+                        <input type="text" id="employeeId" name="employeeId" placeholder="EMP001234 or T001 (enter any ID)" required autocomplete="off">
+                        <div id="employeeSuggestions" class="suggestions-dropdown"></div>
+                        <div id="employeeInfo" class="employee-info"></div>
+                        <div id="notFoundNotice" class="not-found-notice">
+                            ℹ️ Employee not found in database. Please verify details and continue with manual entry.
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="department">Department/Location <span class="required">*</span></label>
+                        <select id="department" name="department" required>
+                            <option value="">Select Department</option>
+                            <option value="CORPORATE">Corporate</option>
+                            <option value="ENGINEERING">Engineering</option>
+                            <option value="FACILITY & ADMIN">Facility & Admin</option>
+                            <option value="FINANCE">Finance</option>
+                            <option value="HUMAN RESOURCES">Human Resources</option>
+                            <option value="ICR&C">ICR&C</option>
+                            <option value="ICT">ICT</option>
+                            <option value="LEGAL">Legal</option>
+                            <option value="MANUFACTURING">Manufacturing</option>
+                            <option value="MARKETING">Marketing</option>
+                            <option value="QUALITY ASSURANCE">Quality Assurance</option>
+                            <option value="SALES">Sales</option>
+                            <option value="SALES - OUTSTATION">Sales - Outstation</option>
+                            <option value="SECURITY">Security</option>
+                            <option value="SUPPLY CHAIN">Supply Chain</option>
+                            <option value="SUPPLY CHAIN - LOGISTICS">Supply Chain - Logistics</option>
+                            <option value="SUPPLY CHAIN - PROCUREMENT">Supply Chain - Procurement</option>
+                            <option value="SUPPLY CHAIN - RAW MATERIAL">Supply Chain - Raw Material</option>
+                            <option value="SUPPLY CHAIN - WAREHOUSE INVENTORY">Supply Chain - Warehouse Inventory</option>
+                            <option value="SWIFT PAINTING - OUTSTATION">Swift Painting - Outstation</option>
+                            <option value="TECHNICAL">Technical</option>
+                            <option value="OTHER">Other (Manual Entry)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="jobCategory">Job Category <span class="required">*</span></label>
+                        <select id="jobCategory" name="jobCategory" required>
+                            <option value="">Select Job Category</option>
+                            <option value="Manufacturing">Manufacturing</option>
+                            <option value="Office">Office</option>
+                            <option value="Field">Field</option>
+                            <option value="Management">Management</option>
+                            <option value="Technical">Technical</option>
+                            <option value="Support">Support</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="visitType">Visit Type <span class="required">*</span></label>
+                        <select id="visitType" name="visitType" required>
+                            <option value="">Select Visit Type</option>
+                            <option value="Emergency">Emergency</option>
+                            <option value="Routine">Routine</option>
+                            <option value="Follow-up">Follow-up</option>
+                            <option value="Preventive">Preventive</option>
+                            <option value="Wellness Check">Wellness Check</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="primaryComplaint">Primary Complaint <span class="required">*</span></label>
+                        <select id="primaryComplaint" name="primaryComplaint" required>
+                            <option value="">Select Primary Complaint</option>
+                            <optgroup label="Musculoskeletal Issues">
+                                <option value="Back Pain">Back Pain</option>
+                                <option value="Joint Pain">Joint Pain</option>
+                                <option value="Neck Pain">Neck Pain</option>
+                                <option value="Repetitive Strain Injury">Repetitive Strain Injury</option>
+                                <option value="Work-related Injury">Work-related Injury</option>
+                            </optgroup>
+                            <optgroup label="Respiratory Conditions">
+                                <option value="Upper Respiratory Infection">Upper Respiratory Infection</option>
+                                <option value="Cough/Cold">Cough/Cold</option>
+                                <option value="Asthma-related">Asthma-related</option>
+                                <option value="Allergic Reactions">Allergic Reactions</option>
+                                <option value="Environmental Irritation">Environmental Irritation</option>
+                            </optgroup>
+                            <optgroup label="Gastrointestinal Issues">
+                                <option value="Abdominal Pain">Abdominal Pain</option>
+                                <option value="Indigestion">Indigestion</option>
+                                <option value="Gastroenteritis">Gastroenteritis</option>
+                                <option value="Peptic Ulcer">Peptic Ulcer</option>
+                                <option value="Food Poisoning">Food Poisoning</option>
+                            </optgroup>
+                            <optgroup label="Cardiovascular & Metabolic">
+                                <option value="Hypertension">Hypertension</option>
+                                <option value="Chest Pain">Chest Pain</option>
+                                <option value="Diabetes-related">Diabetes-related</option>
+                                <option value="Fatigue/Weakness">Fatigue/Weakness</option>
+                            </optgroup>
+                            <optgroup label="Neurological & Mental Health">
+                                <option value="Headache/Migraine">Headache/Migraine</option>
+                                <option value="Stress-related">Stress-related</option>
+                                <option value="Dizziness">Dizziness</option>
+                                <option value="Anxiety/Depression">Anxiety/Depression</option>
+                            </optgroup>
+                            <optgroup label="Dermatological">
+                                <option value="Skin Irritation/Rash">Skin Irritation/Rash</option>
+                                <option value="Allergic Reactions">Allergic Reactions</option>
+                                <option value="Occupational Dermatitis">Occupational Dermatitis</option>
+                                <option value="Wound/Injury Care">Wound/Injury Care</option>
+                            </optgroup>
+                            <optgroup label="Infectious Diseases">
+                                <option value="Malaria">Malaria</option>
+                                <option value="Typhoid">Typhoid</option>
+                                <option value="Urinary Tract Infection">Urinary Tract Infection</option>
+                                <option value="Eye Infections">Eye Infections</option>
+                            </optgroup>
+                            <optgroup label="Preventive Care">
+                                <option value="Health Screening">Health Screening</option>
+                                <option value="Vaccination">Vaccination</option>
+                                <option value="Health Education">Health Education</option>
+                                <option value="Wellness Check">Wellness Check</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="secondaryComplaint">Secondary Complaint (Optional)</label>
+                        <select id="secondaryComplaint" name="secondaryComplaint">
+                            <option value="">Select Secondary Complaint (Optional)</option>
+                            <optgroup label="Musculoskeletal Issues">
+                                <option value="Back Pain">Back Pain</option>
+                                <option value="Joint Pain">Joint Pain</option>
+                                <option value="Neck Pain">Neck Pain</option>
+                                <option value="Repetitive Strain Injury">Repetitive Strain Injury</option>
+                                <option value="Work-related Injury">Work-related Injury</option>
+                            </optgroup>
+                            <optgroup label="Respiratory Conditions">
+                                <option value="Upper Respiratory Infection">Upper Respiratory Infection</option>
+                                <option value="Cough/Cold">Cough/Cold</option>
+                                <option value="Asthma-related">Asthma-related</option>
+                                <option value="Allergic Reactions">Allergic Reactions</option>
+                                <option value="Environmental Irritation">Environmental Irritation</option>
+                            </optgroup>
+                            <optgroup label="Gastrointestinal Issues">
+                                <option value="Abdominal Pain">Abdominal Pain</option>
+                                <option value="Indigestion">Indigestion</option>
+                                <option value="Gastroenteritis">Gastroenteritis</option>
+                                <option value="Peptic Ulcer">Peptic Ulcer</option>
+                                <option value="Food Poisoning">Food Poisoning</option>
+                            </optgroup>
+                            <optgroup label="Cardiovascular & Metabolic">
+                                <option value="Hypertension">Hypertension</option>
+                                <option value="Chest Pain">Chest Pain</option>
+                                <option value="Diabetes-related">Diabetes-related</option>
+                                <option value="Fatigue/Weakness">Fatigue/Weakness</option>
+                            </optgroup>
+                            <optgroup label="Neurological & Mental Health">
+                                <option value="Headache/Migraine">Headache/Migraine</option>
+                                <option value="Stress-related">Stress-related</option>
+                                <option value="Dizziness">Dizziness</option>
+                                <option value="Anxiety/Depression">Anxiety/Depression</option>
+                            </optgroup>
+                            <optgroup label="Dermatological">
+                                <option value="Skin Irritation/Rash">Skin Irritation/Rash</option>
+                                <option value="Allergic Reactions">Allergic Reactions</option>
+                                <option value="Occupational Dermatitis">Occupational Dermatitis</option>
+                                <option value="Wound/Injury Care">Wound/Injury Care</option>
+                            </optgroup>
+                            <optgroup label="Infectious Diseases">
+                                <option value="Malaria">Malaria</option>
+                                <option value="Typhoid">Typhoid</option>
+                                <option value="Urinary Tract Infection">Urinary Tract Infection</option>
+                                <option value="Eye Infections">Eye Infections</option>
+                            </optgroup>
+                            <optgroup label="Preventive Care">
+                                <option value="Health Screening">Health Screening</option>
+                                <option value="Vaccination">Vaccination</option>
+                                <option value="Health Education">Health Education</option>
+                                <option value="Wellness Check">Wellness Check</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="treatmentGiven">Treatment Given <span class="required">*</span></label>
+                        <select id="treatmentGiven" name="treatmentGiven" required>
+                            <option value="">Select Treatment Given</option>
+                            <option value="Medication">Medication</option>
+                            <option value="Rest">Rest</option>
+                            <option value="Referral">Referral</option>
+                            <option value="First Aid">First Aid</option>
+                            <option value="Health Education">Health Education</option>
+                            <option value="Physical Therapy">Physical Therapy</option>
+                            <option value="Observation">Observation</option>
+                            <option value="No Treatment Required">No Treatment Required</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="medication-section">
+                    <div class="section-title">Medication & Treatment Details</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="medicationDispensed">Medication Dispensed</label>
+                            <textarea id="medicationDispensed" name="medicationDispensed" rows="3" placeholder="e.g., Paracetamol 500mg x 10, Ibuprofen 400mg x 6"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="daysOff">Days Off Recommended</label>
+                            <select id="daysOff" name="daysOff">
+                                <option value="0">0 Days</option>
+                                <option value="1">1 Day</option>
+                                <option value="2">2 Days</option>
+                                <option value="3">3 Days</option>
+                                <option value="4">4 Days</option>
+                                <option value="5">5 Days</option>
+                                <option value="7">1 Week</option>
+                                <option value="14">2 Weeks</option>
+                                <option value="other">Other (specify in notes)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="referral-section">
+                    <div class="section-title">Referral & Follow-up</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Referral Required?</label>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="referralRequired" name="referralRequired" value="yes">
+                                <label for="referralRequired">Yes, referral required</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="referralType">Referral Type (if required)</label>
+                            <select id="referralType" name="referralType">
+                                <option value="">Select Referral Type</option>
+                                <option value="Hospital">Hospital</option>
+                                <option value="Specialist">Specialist</option>
+                                <option value="HMO">HMO</option>
+                                <option value="Emergency Room">Emergency Room</option>
+                                <option value="Laboratory">Laboratory</option>
+                                <option value="Imaging Center">Imaging Center</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Follow-up Required?</label>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="followupRequired" name="followupRequired" value="yes">
+                                <label for="followupRequired">Yes, follow-up required</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="followupDate">Follow-up Date (if required)</label>
+                            <input type="date" id="followupDate" name="followupDate">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="attendingStaff">Attending Nurse/Medical Officer <span class="required">*</span></label>
+                        <select id="attendingStaff" name="attendingStaff" required>
+                            <option value="">Select Staff Member</option>
+                            <option value="Nurse A">Nurse A</option>
+                            <option value="Nurse B">Nurse B</option>
+                            <option value="Nurse C">Nurse C</option>
+                            <option value="Medical Officer A">Medical Officer A</option>
+                            <option value="Medical Officer B">Medical Officer B</option>
+                            <option value="Chief Medical Officer">Chief Medical Officer</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="additionalNotes">Additional Notes/Observations</label>
+                        <textarea id="additionalNotes" name="additionalNotes" rows="4" placeholder="Any additional observations, treatment details, or important notes..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="submit-section">
+                    <button type="button" class="btn-clear" id="clearFormBtn">Clear Form</button>
+                    <button type="submit" class="btn-submit">💾 Save Visit Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Employee Database from CSV
+        const employeeDatabase = [
+            {empNo: "1326", name: "FAGUN, ALABA", department: "CORPORATE", location: "LAGOS", jobRole: "GROUP MANAGING DIRECTOR"},
+            {empNo: "1370", name: "OJEYOKAN, NKECHI", department: "FINANCE", location: "LAGOS", jobRole: "CFO"},
+            {empNo: "1042", name: "AKINREMI, OLAWALE", department: "SALES", location: "LAGOS", jobRole: "HEAD OF SALES"},
+            {empNo: "845", name: "OLAJUBU, ADERONKE", department: "CORPORATE", location: "OGUN", jobRole: "HEAD, PRODUCT MANAGEMENT"},
+            {empNo: "1385", name: "EBONG, JOSEPH MCDONALD", department: "ICR&C", location: "LAGOS", jobRole: "HEAD, INTERNAL CONTROL, RISK & COMPLIANCE"},
+            {empNo: "1387", name: "MOMOH, KAYODE", department: "CORPORATE", location: "LAGOS", jobRole: "GENERAL MANAGER OPERATIONS"},
+            {empNo: "1375", name: "AGBARA, RITA-MARY OLAIDE", department: "CORPORATE", location: "LAGOS", jobRole: "EXECUTIVE ASSISTANT"},
+            {empNo: "1251", name: "ADENIYI, JOHN OLAYINKA", department: "ENGINEERING", location: "LAGOS", jobRole: "ENGINEERING MANAGER"},
+            {empNo: "1292", name: "ALEJI, AYODELE", department: "ENGINEERING", location: "LAGOS", jobRole: "TECHNICAL OPERATOR"},
+            {empNo: "1293", name: "TIJANI, ENESI", department: "ENGINEERING", location: "LAGOS", jobRole: "TECHNICAL OPERATOR"},
+            {empNo: "1775", name: "OMALE, JONAH SUCCESS", department: "ENGINEERING", location: "LAGOS", jobRole: "AUTOMATION SUPERINTENDENT"},
+            {empNo: "1790", name: "QUADRI, TAIWO HASSAN", department: "ENGINEERING", location: "LAGOS", jobRole: "FITTER MECHANIC"},
+            {empNo: "T020", name: "SALIHU, SHEHU", department: "ENGINEERING", location: "N/A - ICS", jobRole: "MILLING OPERATOR - NEW FACTORY"},
+            {empNo: "819", name: "RICHARDS-ONI, JANET OPEYEMI", department: "FACILITY & ADMIN", location: "LAGOS", jobRole: "AMBIENCE QUALITY SUPERVISOR"},
+            {empNo: "1312", name: "ALARA, KOLA", department: "FACILITY & ADMIN", location: "LAGOS", jobRole: "FACILITY OFFICER"},
+            {empNo: "1316", name: "OBAYO, SHINAPETER SEUN", department: "FACILITY & ADMIN", location: "LAGOS", jobRole: "ADMIN OFFICER"},
+            {empNo: "1332", name: "ADESANYA, TAIWO", department: "FACILITY & ADMIN", location: "LAGOS", jobRole: "HSE OFFICER"},
+            {empNo: "1334", name: "ALEBIOSU, AFEEZ", department: "FACILITY & ADMIN", location: "LAGOS", jobRole: "PLUMBER/TECHNICIAN"},
+            {empNo: "1340", name: "ELIJAH, ADEWUYI OMONIYI", department: "FACILITY & ADMIN", location: "LAGOS", jobRole: "ELECTRICIAN"},
+            {empNo: "1356", name: "ILUKWE, TOBECHUKWU", department: "FACILITY & ADMIN", location: "LAGOS", jobRole: "FACILITY & SHE MANAGER"},
+            {empNo: "1738", name: "SALAU, IDOWU", department: "FACILITY & ADMIN", location: "LAGOS", jobRole: "DRIVER"},
+            {empNo: "1813", name: "OMOLE, BUSOLA", department: "FACILITY & ADMIN", location: "LAGOS", jobRole: "DRIVER"},
+            {empNo: "1082", name: "AJAYI, RUTH ODELEYE", department: "FINANCE", location: "LAGOS", jobRole: "TREASURY SUPERVISOR"},
+            {empNo: "1308", name: "OWOJUYIGBE, PETER", department: "FINANCE", location: "LAGOS", jobRole: "FACTORY ACCOUNTANT"},
+            {empNo: "1310", name: "ORIMOLOYE, ZAINAB", department: "FINANCE", location: "LAGOS", jobRole: "TAX MANAGER"},
+            {empNo: "1324", name: "KAYODE, FEMI ABIODUN", department: "FINANCE", location: "LAGOS", jobRole: "COST & MANAGEMENT ACCOUNTANT"},
+            {empNo: "1330", name: "ADEBISI, JAMES OLUWAFEMI", department: "FINANCE", location: "LAGOS", jobRole: "FINANCE MANAGER"},
+            {empNo: "1333", name: "AJEBE, DEBORAH OROHU", department: "FINANCE", location: "OGUN", jobRole: "ACCOUNT PAYABLE AND FIXED ASSET"},
+            {empNo: "1818", name: "GBADEGESIN, REBECCA", department: "FINANCE", location: "LAGOS", jobRole: "ACCOUNT RECEIVEABLE/CASHIER"},
+            {empNo: "1311", name: "BAMIDELE, FEYISARA ADEJOKE", department: "HUMAN RESOURCES", location: "LAGOS", jobRole: "HUMAN RESOURCES ASSISTANT"},
+            {empNo: "1362", name: "UCHE-OGWU, INIMFON", department: "HUMAN RESOURCES", location: "LAGOS", jobRole: "HUMAN RESOURCES GENERALIST"},
+            {empNo: "1367", name: "ADEMOLU, SEYE", department: "HUMAN RESOURCES", location: "LAGOS", jobRole: "COMPENSATION AND PERFORMANCE MANAGER"},
+            {empNo: "1206", name: "OGUNNUBI, ABIMBOLA", department: "ICR&C", location: "LAGOS", jobRole: "RISK MANAGER"},
+            {empNo: "1319", name: "ADEBAYO, JULIANAH NIKE", department: "ICR&C", location: "LAGOS", jobRole: "PROCESS QUALITY & COMPLIANCE"},
+            {empNo: "1348", name: "OLORUNWA, BABATUNDE", department: "ICR&C", location: "LAGOS", jobRole: "CREDIT CONTROL & RISK OFFICER"},
+            {empNo: "1350", name: "ANYAOHA, FORTUNE", department: "ICR&C", location: "LAGOS", jobRole: "INTERNAL CONTROL OFFICER"},
+            {empNo: "1353", name: "OMUYA, MARY ONYOZE", department: "ICR&C", location: "LAGOS", jobRole: "INTERNAL CONTROL MANAGER"},
+            {empNo: "1820", name: "MAJEKODUNMI, BABATUNDE", department: "ICR&C", location: "LAGOS", jobRole: "INTERNAL CONTROL OFFICER"},
+            {empNo: "T073", name: "AKINDURO, OMOWUNMI OMODUNNI", department: "ICR&C", location: "N/A - ICS", jobRole: "INTERNAL CONTROL OFFICER"},
+            {empNo: "1336", name: "JOKODOLA, OLALEYE TIMOTHY", department: "ICT", location: "LAGOS", jobRole: "ICT MANAGER"},
+            {empNo: "1349", name: "BULLEM, EMMANUEL", department: "ICT", location: "LAGOS", jobRole: "SYSTEMS ADMINISTRATOR"},
+            {empNo: "1342", name: "BABATOPE, OREOLUWA DEBORAH", department: "LEGAL", location: "LAGOS", jobRole: "ASSISTANT COMPANY SECRETARY & LEGAL ADVISOR"},
+            {empNo: "1238", name: "ADEKUNLE, ADEBAYO KAYODE", department: "MANUFACTURING", location: "LAGOS", jobRole: "MANUFACTURING MANAGER"},
+            {empNo: "1245", name: "ODEBUNMI, SEGUN ADELEKE", department: "MANUFACTURING", location: "LAGOS", jobRole: "PRODUCTION MANAGER - NEW FACTORY"},
+            {empNo: "1547", name: "AKPAESSIEN, ANIEFIOK ETIM", department: "MANUFACTURING", location: "LAGOS", jobRole: "PRODUCTION MANAGER - SOLVENT BASED"},
+            {empNo: "1584", name: "OSINDELE, OLUSEGUN", department: "MANUFACTURING", location: "LAGOS", jobRole: "TINTING TECHNICIAN/OPERATIVE - solvent base"},
+            {empNo: "1590", name: "SULAIMAN, FATAI", department: "MANUFACTURING", location: "LAGOS", jobRole: "CODING SUPERVISOR"},
+            {empNo: "1621", name: "ADEDAPO, MUSIBAU TEMITOPE", department: "MANUFACTURING", location: "OGUN", jobRole: "MILLING OPERATIVE - NEW FACTORY"},
+            {empNo: "1636", name: "AKINNAWO, TOMISIN", department: "MANUFACTURING", location: "LAGOS", jobRole: "LET-DOWN POERATIVE - SOLVENT BASE"},
+            {empNo: "1642", name: "OYELEYE, JOHNSON OLANIYI", department: "MANUFACTURING", location: "LAGOS", jobRole: "TINTER/COLOUR MATCHER - WATER BASE"},
+            {empNo: "1651", name: "AGBONSELOBHOR, MONDAY", department: "MANUFACTURING", location: "OGUN", jobRole: "LETDOWN SUPERVISOR"},
+            {empNo: "1716", name: "OLANIYAN, OLABODE", department: "MANUFACTURING", location: "LAGOS", jobRole: "HEAD TINTER"},
+            {empNo: "1724", name: "OLOGUNOWA, DURODOLA", department: "MANUFACTURING", location: "OGUN", jobRole: "PRODUCTION MANAGER - WATERBASE"},
+            {empNo: "1734", name: "AKINYEMI, BABATUNDE", department: "MANUFACTURING", location: "LAGOS", jobRole: "CODING OPERATIVE"},
+            {empNo: "1758", name: "ADEBAYO, SAMUEL OLUSEGUN", department: "MANUFACTURING", location: "LAGOS", jobRole: "MILLING SUPERVISOR - SOLVENT BASE"},
+            {empNo: "1770", name: "OKEKUNLE, OLAOLUWAKUNLE", department: "MANUFACTURING", location: "LAGOS", jobRole: "FILLING OPERATIVE - SOLVENT BASED"},
+            {empNo: "1771", name: "DAUDU, MONDAY", department: "MANUFACTURING", location: "LAGOS", jobRole: "FORKLIFT DRIVER"},
+            {empNo: "1807", name: "LAWAL, NURUDEEN BABATUNDE", department: "MANUFACTURING", location: "LAGOS", jobRole: "TINTING TECHNICIAN/OPERATIVE - WATER BASE"},
+            {empNo: "1812", name: "ADEBOWALE, AKOREDE", department: "MANUFACTURING", location: "LAGOS", jobRole: "TINTING TECHNICIAN/OPERATIVE - WATER BASE"},
+            {empNo: "1816", name: "ORIMOLADE, SAMUEL", department: "MANUFACTURING", location: "LAGOS", jobRole: "ASSISTANT DATA ANALYST"},
+            {empNo: "1821", name: "ONYEKACHI, OKPARA SAMUEL", department: "MANUFACTURING", location: "LAGOS", jobRole: "LETDOWN OPERATOR/NEW FACTORY ASSISTANT"},
+            {empNo: "1053", name: "AJAO, KAZEEM GBOLASIRE", department: "MANUFACTURING", location: "OGUN", jobRole: "DATA ANALYST"},
+            {empNo: "1341", name: "OLUBUNMI, BALOGUN", department: "MARKETING", location: "LAGOS", jobRole: "BRAND ACTIVATION OFFICER"},
+            {empNo: "1372", name: "BRIGGS, DIEPRIYE LOLO", department: "MARKETING", location: "LAGOS", jobRole: "CUSTOMER RELATIONS OFFICER"},
+            {empNo: "1379", name: "OGUNMEKAN, OLUWADAMILARE", department: "MARKETING", location: "LAGOS", jobRole: "DIGITAL MARKETING OFFICER"},
+            {empNo: "1380", name: "ADIBE, IFEANYI", department: "QUALITY ASSURANCE", location: "LAGOS", jobRole: "QUALITY ASSURANCE MANAGER"},
+            {empNo: "1358", name: "TITUS, MARTINS ONYEKACHI", department: "QUALITY ASSURANCE", location: "LAGOS", jobRole: "PROCESS CHEMIST"},
+            {empNo: "1369", name: "OBOH, EMMANUEL", department: "QUALITY ASSURANCE", location: "LAGOS", jobRole: "PROCESS CHEMIST"},
+            {empNo: "1339", name: "AGBABIAKA, RUKAYAT ENIOLA", department: "QUALITY ASSURANCE", location: "LAGOS", jobRole: "ASSISTANT QUALITY CONTROL CHEMIST"},
+            {empNo: "T007", name: "KEHINDE, OLADIMEJI OLUBUNMI", department: "QUALITY ASSURANCE", location: "N/A - ICS", jobRole: "EFFLUENT TREATMENT PLANT OPERATOR"},
+            {empNo: "1259", name: "EMIYARE, ISREAL", department: "SALES", location: "LAGOS", jobRole: "SALES ASSURANCE MANAGER/ANALYST"},
+            {empNo: "1127", name: "AJISEFINNI, ABISOLA", department: "SALES", location: "LAGOS", jobRole: "SALES ADMIN MANAGER"},
+            {empNo: "1714", name: "OPEBIYI, JOHNSON", department: "SALES", location: "OGUN", jobRole: "INVOICING OFFICER"},
+            {empNo: "1331", name: "AKHAINE, AIMIENWAU JOSHUA", department: "SECURITY", location: "LAGOS", jobRole: "SECURITY MANAGER"},
+            {empNo: "1798", name: "LAWAL, IDRIS OLALEKAN", department: "SECURITY", location: "OGUN", jobRole: "WAREHOUSE SECURITY SUPERVISOR"},
+            {empNo: "1808", name: "FAKORE, OLALEKAN EMMANUEL", department: "SECURITY", location: "LAGOS", jobRole: "WAREHOUSE SECURITY SUPERVISOR"},
+            {empNo: "1381", name: "SIMON, PAUL", department: "SECURITY", location: "LAGOS", jobRole: "CONTROL ROOM SECURITY OFFICER"},
+            {empNo: "1177", name: "AKINYEMI, SUNDAY Olatunde", department: "SUPPLY CHAIN", location: "LAGOS", jobRole: "PLANNING MANAGER"},
+            {empNo: "1357", name: "LEONALD-EMEKA, EDITH", department: "SUPPLY CHAIN", location: "LAGOS", jobRole: "SUPPLY CHAIN MANAGER"},
+            {empNo: "905", name: "OYELADE, ALABA", department: "SUPPLY CHAIN - LOGISTICS", location: "LAGOS", jobRole: "LOGISTICS PERSONNEL"},
+            {empNo: "1501", name: "SALAU, WASIU", department: "SUPPLY CHAIN - LOGISTICS", location: "OGUN", jobRole: "LOGISTICS MANAGER"},
+            {empNo: "1309", name: "OKECHUKWU OPARA, MARIA", department: "SUPPLY CHAIN - PROCUREMENT", location: "LAGOS", jobRole: "PROCUREMENT CATEGORY MANAGER"},
+            {empNo: "1725", name: "YOOSUF, AKOREDE", department: "SUPPLY CHAIN - PROCUREMENT", location: "LAGOS", jobRole: "PROCUREMENT MANAGER"},
+            {empNo: "1168", name: "AFOLABI, ADEPEJU OMOLADE", department: "SUPPLY CHAIN - RAW MATERIAL", location: "LAGOS", jobRole: "RAW MATERIAL WAREHOUSE SUPERVISOR"},
+            {empNo: "1368", name: "ADELEYE, SAMSON ADEOLA", department: "SUPPLY CHAIN - RAW MATERIAL", location: "LAGOS", jobRole: "INVENTORY OFFICER-DRUM FARM"},
+            {empNo: "1654", name: "UDOH, BLESSING ASUKWO", department: "SUPPLY CHAIN - RAW MATERIAL", location: "LAGOS", jobRole: "INVENTORY OFFICER -CAN STORE"},
+            {empNo: "1777", name: "TAIWO, ONI JOSEPH", department: "SUPPLY CHAIN - RAW MATERIAL", location: "OGUN", jobRole: "POWDER STORE OPERATIVE"},
+            {empNo: "1811", name: "HUSSAINI, MOHAMMED", department: "SUPPLY CHAIN - RAW MATERIAL", location: "LAGOS", jobRole: "RAW MATERIAL INVENTORY CLERK"},
+            {empNo: "1680", name: "OJO, ALBERT MAYOWA", department: "SUPPLY CHAIN - WAREHOUSE INVENTORY", location: "OGUN", jobRole: "INVENTORY CONTROL MANAGER"},
+            {empNo: "1337", name: "ADEWOLE, ABAYOMI ADEDIMEJI", department: "SUPPLY CHAIN - WAREHOUSE INVENTORY", location: "LAGOS", jobRole: "INVENTORY OFFICER"},
+            {empNo: "1778", name: "OLADEHINDE, OLUWASEGUN ISRAEL", department: "SUPPLY CHAIN - WAREHOUSE INVENTORY", location: "LAGOS", jobRole: "INVENTORY OFFICER"},
+            {empNo: "1782", name: "OGUNSANYA, OLUWATOBILOBA ISKILU", department: "SUPPLY CHAIN - WAREHOUSE INVENTORY", location: "OGUN", jobRole: "INVENTORY SUPERVISOR"},
+            {empNo: "1789", name: "OTUBU, ADENUGA MONSURAT", department: "SUPPLY CHAIN - WAREHOUSE INVENTORY", location: "OGUN", jobRole: "GENERAL GOODS & ENGINEERING SUPERVISOR"},
+            {empNo: "1805", name: "AKEEM, ISHOLA BABTUNDE", department: "SUPPLY CHAIN - WAREHOUSE INVENTORY", location: "LAGOS", jobRole: "FORKLIFT DRIVER"},
+            {empNo: "1810", name: "NOBIU, OLALEKAN", department: "SUPPLY CHAIN - WAREHOUSE INVENTORY", location: "LAGOS", jobRole: "FORKLIFT DRIVER"},
+            {empNo: "1732", name: "SALAMI, RILWAN", department: "SWIFT PAINTING - OUTSTATION", location: "LAGOS", jobRole: "PAINTER"},
+            {empNo: "1733", name: "ADEYEMI, BAMIDELE EZEKIEL", department: "SWIFT PAINTING - OUTSTATION", location: "LAGOS", jobRole: "PAINTER"},
+            {empNo: "1797", name: "OGUNLARI, ADEDOYIN", department: "SWIFT PAINTING - OUTSTATION", location: "OGUN", jobRole: "PAINTER"},
+            {empNo: "1226", name: "OBOLO, OMOWUMI OLUWATOYIN", department: "SWIFT PAINTING - OUTSTATION", location: "LAGOS", jobRole: "COMMERCIAL MANAGER"},
+            {empNo: "1383", name: "DAMILOLA, OJO", department: "SWIFT PAINTING - OUTSTATION", location: "LAGOS", jobRole: "QUANTITY SURVEYOR"},
+            {empNo: "1060", name: "AJAYI, ADENIKE", department: "TECHNICAL", location: "LAGOS", jobRole: "SENIOR DEVELOPMENT CHEMIST"},
+            {empNo: "1173", name: "LAWAL, OLUSEGUN", department: "TECHNICAL", location: "LAGOS", jobRole: "TECHNICAL MANAGER"},
+            {empNo: "1247", name: "ADEBOYE, FRANCES TEMITOPE", department: "TECHNICAL", location: "LAGOS", jobRole: "DEVELOPMENT CHEMIST"},
+            {empNo: "1774", name: "AFOLABI, KAFAYAT", department: "TECHNICAL", location: "LAGOS", jobRole: "POS OPERATOR"},
+            {empNo: "1806", name: "LIASU, SIKIRU", department: "TECHNICAL", location: "LAGOS", jobRole: "POS OPERATOR"},
+            {empNo: "1819", name: "ADEKUNLE, ONIJAGUN", department: "TECHNICAL", location: "ABUJA", jobRole: "POS OPERATOR"}
+        ];
+
+        // Employee search and auto-complete functionality
+        const employeeIdInput = document.getElementById('employeeId');
+        const suggestionsDiv = document.getElementById('employeeSuggestions');
+        const employeeInfoDiv = document.getElementById('employeeInfo');
+        const departmentSelect = document.getElementById('department');
+        const jobCategorySelect = document.getElementById('jobCategory');
+        const notFoundNotice = document.getElementById('notFoundNotice');
+
+        let selectedEmployee = null;
+
+        // Search employees
+        function searchEmployees(query) {
+            if (!query || query.length < 2) {
+                return [];
+            }
+            
+            return employeeDatabase.filter(emp => 
+                emp.empNo.toLowerCase().includes(query.toLowerCase()) ||
+                emp.name.toLowerCase().includes(query.toLowerCase())
+            ).slice(0, 8); // Limit to 8 results
+        }
+
+        // Display suggestions
+        function displaySuggestions(employees) {
+            if (employees.length === 0) {
+                suggestionsDiv.style.display = 'none';
+                return;
+            }
+
+            const suggestionsHtml = employees.map(emp => `
+                <div class="suggestion-item" data-emp='${JSON.stringify(emp)}'>
+                    <div class="suggestion-emp-no">${emp.empNo}</div>
+                    <div class="suggestion-name">${emp.name}</div>
+                    <div class="suggestion-dept">${emp.department} - ${emp.jobRole}</div>
+                </div>
+            `).join('');
+
+            suggestionsDiv.innerHTML = suggestionsHtml;
+            suggestionsDiv.style.display = 'block';
+
+            // Add click listeners to suggestions
+            suggestionsDiv.querySelectorAll('.suggestion-item').forEach(item => {
+                item.addEventListener('click', () => selectEmployee(JSON.parse(item.dataset.emp)));
+            });
+        }
+
+        // Select employee and auto-fill form
+        function selectEmployee(employee) {
+            selectedEmployee = employee;
+            employeeIdInput.value = employee.empNo;
+            
+            // Auto-fill department
+            departmentSelect.value = employee.department;
+            departmentSelect.classList.add('auto-filled');
+            
+            // Auto-fill job category based on role
+            const jobCategoryMap = {
+                'MANAGER': 'Management',
+                'SUPERVISOR': 'Management', 
+                'HEAD': 'Management',
+                'DIRECTOR': 'Management',
+                'CFO': 'Management',
+                'GMD': 'Management',
+                'OPERATOR': 'Manufacturing',
+                'OPERATIVE': 'Manufacturing',
+                'TECHNICIAN': 'Technical',
+                'CHEMIST': 'Technical',
+                'DRIVER': 'Support',
+                'SECURITY': 'Support',
+                'ADMIN': 'Office',
+                'OFFICER': 'Office',
+                'ASSISTANT': 'Office'
+            };
+            
+            let jobCategory = 'Office'; // default
+            const role = employee.jobRole.toUpperCase();
+            
+            for (const [key, category] of Object.entries(jobCategoryMap)) {
+                if (role.includes(key)) {
+                    jobCategory = category;
+                    break;
+                }
+            }
+            
+            jobCategorySelect.value = jobCategory;
+            jobCategorySelect.classList.add('auto-filled');
+            
+            // Show employee info
+            displayEmployeeInfo(employee);
+            
+            // Hide suggestions and notices
+            suggestionsDiv.style.display = 'none';
+            notFoundNotice.style.display = 'none';
+            employeeIdInput.classList.add('auto-filled');
+            employeeIdInput.classList.remove('manual-entry');
+        }
+
+        // Display employee information
+        function displayEmployeeInfo(employee) {
+            employeeInfoDiv.innerHTML = `
+                <h4>✅ Employee Found</h4>
+                <p><strong>Name:</strong> ${employee.name}</p>
+                <p><strong>Department:</strong> ${employee.department}</p>
+                <p><strong>Role:</strong> ${employee.jobRole}</p>
+                <p><strong>Location:</strong> ${employee.location}</p>
+            `;
+            employeeInfoDiv.classList.add('show');
+        }
+
+        // Handle manual entry (employee not in database)
+        function handleManualEntry() {
+            selectedEmployee = null;
+            employeeInfoDiv.classList.remove('show');
+            notFoundNotice.style.display = 'block';
+            
+            // Reset auto-filled styling
+            departmentSelect.classList.remove('auto-filled');
+            jobCategorySelect.classList.remove('auto-filled');
+            employeeIdInput.classList.remove('auto-filled');
+            employeeIdInput.classList.add('manual-entry');
+        }
+
+        // Employee ID input event listeners
+        employeeIdInput.addEventListener('input', function() {
+            const query = this.value.trim();
+            
+            if (query.length >= 2) {
+                const matches = searchEmployees(query);
+                displaySuggestions(matches);
+                
+                // Check for exact match
+                const exactMatch = employeeDatabase.find(emp => 
+                    emp.empNo.toLowerCase() === query.toLowerCase()
+                );
+                
+                if (exactMatch) {
+                    selectEmployee(exactMatch);
+                } else if (matches.length === 0 && query.length > 2) {
+                    handleManualEntry();
+                }
+            } else {
+                suggestionsDiv.style.display = 'none';
+                if (selectedEmployee === null) {
+                    employeeInfoDiv.classList.remove('show');
+                    notFoundNotice.style.display = 'none';
+                    employeeIdInput.classList.remove('auto-filled', 'manual-entry');
+                }
+            }
+        });
+
+        // Close suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!employeeIdInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+                suggestionsDiv.style.display = 'none';
+            }
+        });
+
+        // Keyboard navigation for suggestions
+        employeeIdInput.addEventListener('keydown', function(e) {
+            const suggestions = suggestionsDiv.querySelectorAll('.suggestion-item');
+            let currentIndex = Array.from(suggestions).findIndex(item => item.classList.contains('highlighted'));
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (currentIndex < suggestions.length - 1) {
+                    if (currentIndex >= 0) suggestions[currentIndex].classList.remove('highlighted');
+                    suggestions[currentIndex + 1].classList.add('highlighted');
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (currentIndex > 0) {
+                    suggestions[currentIndex].classList.remove('highlighted');
+                    suggestions[currentIndex - 1].classList.add('highlighted');
+                }
+            } else if (e.key === 'Enter' && currentIndex >= 0) {
+                e.preventDefault();
+                const selectedData = JSON.parse(suggestions[currentIndex].dataset.emp);
+                selectEmployee(selectedData);
+            }
+        });
+
+        // Set default date and time
+        document.getElementById('visitDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('visitTime').value = new Date().toTimeString().slice(0, 5);
+
+        // Google Sheets Web App URL - Replace with your actual URL after deployment
+        const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzoZ9CCgeWKFJrxdUAsn-uMBGLHQOMSy6ArPn6EWpgsI6iUWdTnds6WrMKcuYas23ka/exec';
+
+        // Form validation and submission
+        document.getElementById('clinicForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Validate required fields
+            const requiredFields = this.querySelectorAll('[required]');
+            let isValid = true;
+
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.style.borderColor = '#e74c3c';
+                    isValid = false;
+                } else {
+                    field.style.borderColor = '#e1e8ed';
+                }
+            });
+
+            if (!isValid) {
+                alert('Please fill in all required fields marked with *');
+                return;
+            }
+
+            // Disable submit button to prevent double submission
+            const submitBtn = document.querySelector('.btn-submit');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = '💾 Saving...';
+
+            // Show immediate success feedback
+            setTimeout(() => {
+                // Show success message
+                document.getElementById('successMessage').innerHTML =
+                    '✅ Visit record saved successfully to Google Sheets!';
+                document.getElementById('successMessage').style.display = 'block';
+                document.getElementById('successMessage').style.backgroundColor = '#d4edda';
+                document.getElementById('successMessage').style.color = '#155724';
+                document.getElementById('successMessage').style.border = '1px solid #c3e6cb';
+
+                // Clear form for next entry
+                clearFormData();
+
+                // Auto-hide success message after 5 seconds
+                setTimeout(() => {
+                    document.getElementById('successMessage').style.display = 'none';
+                }, 5000);
+
+                // Scroll to top
+                window.scrollTo(0, 0);
+
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }, 500);
+
+            // Now submit the form in the background
+            try {
+                // Create a hidden form to submit to Google Apps Script
+                const hiddenForm = document.createElement('form');
+                hiddenForm.method = 'POST';
+                hiddenForm.action = GOOGLE_SHEETS_URL;
+                hiddenForm.target = 'hidden_iframe';
+                hiddenForm.style.display = 'none';
+
+                // Collect form data
+                const formData = new FormData(this);
+
+                // Add all form fields as hidden inputs
+                for (let [key, value] of formData.entries()) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = value;
+                    hiddenForm.appendChild(input);
+                }
+
+                // Add checkbox values
+                const referralInput = document.createElement('input');
+                referralInput.type = 'hidden';
+                referralInput.name = 'referralRequired';
+                referralInput.value = document.getElementById('referralRequired').checked;
+                hiddenForm.appendChild(referralInput);
+
+                const followupInput = document.createElement('input');
+                followupInput.type = 'hidden';
+                followupInput.name = 'followupRequired';
+                followupInput.value = document.getElementById('followupRequired').checked;
+                hiddenForm.appendChild(followupInput);
+
+                // Add employee database info if available
+                if (selectedEmployee) {
+                    const nameInput = document.createElement('input');
+                    nameInput.type = 'hidden';
+                    nameInput.name = 'employeeName';
+                    nameInput.value = selectedEmployee.name;
+                    hiddenForm.appendChild(nameInput);
+
+                    const locationInput = document.createElement('input');
+                    locationInput.type = 'hidden';
+                    locationInput.name = 'employeeLocation';
+                    locationInput.value = selectedEmployee.location;
+                    hiddenForm.appendChild(locationInput);
+
+                    const roleInput = document.createElement('input');
+                    roleInput.type = 'hidden';
+                    roleInput.name = 'employeeJobRole';
+                    roleInput.value = selectedEmployee.jobRole;
+                    hiddenForm.appendChild(roleInput);
+
+                    const sourceInput = document.createElement('input');
+                    sourceInput.type = 'hidden';
+                    sourceInput.name = 'dataSource';
+                    sourceInput.value = 'database';
+                    hiddenForm.appendChild(sourceInput);
+                } else {
+                    const sourceInput = document.createElement('input');
+                    sourceInput.type = 'hidden';
+                    sourceInput.name = 'dataSource';
+                    sourceInput.value = 'manual_entry';
+                    hiddenForm.appendChild(sourceInput);
+                }
+
+                // Create hidden iframe
+                let iframe = document.getElementById('hidden_iframe');
+                if (!iframe) {
+                    iframe = document.createElement('iframe');
+                    iframe.name = 'hidden_iframe';
+                    iframe.id = 'hidden_iframe';
+                    iframe.style.display = 'none';
+                    document.body.appendChild(iframe);
+                }
+
+                // Submit the form in background
+                document.body.appendChild(hiddenForm);
+                hiddenForm.submit();
+                document.body.removeChild(hiddenForm);
+
+            } catch (error) {
+                console.error('Error saving data:', error);
+                // Update success message to show error
+                document.getElementById('successMessage').innerHTML =
+                    '⚠️ There was an issue submitting the form. Please check your internet connection and try again.';
+                document.getElementById('successMessage').style.backgroundColor = '#fff3cd';
+                document.getElementById('successMessage').style.color = '#856404';
+                document.getElementById('successMessage').style.border = '1px solid #ffc107';
+            }
+        });
+
+        // Clear form data function
+        function clearFormData() {
+            document.getElementById('clinicForm').reset();
+
+            // Reset employee-related data
+            selectedEmployee = null;
+            employeeInfoDiv.classList.remove('show');
+            notFoundNotice.style.display = 'none';
+            suggestionsDiv.style.display = 'none';
+
+            // Remove styling classes
+            employeeIdInput.classList.remove('auto-filled', 'manual-entry');
+            departmentSelect.classList.remove('auto-filled');
+            jobCategorySelect.classList.remove('auto-filled');
+
+            // Reset date and time to current
+            document.getElementById('visitDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('visitTime').value = new Date().toTimeString().slice(0, 5);
+
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        // Clear form button event listener
+        document.getElementById('clearFormBtn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to clear all form data?')) {
+                clearFormData();
+            }
+        });
+
+        // Auto-enable/disable referral type based on referral checkbox
+        document.getElementById('referralRequired').addEventListener('change', function() {
+            const referralType = document.getElementById('referralType');
+            if (this.checked) {
+                referralType.required = true;
+                referralType.style.opacity = '1';
+            } else {
+                referralType.required = false;
+                referralType.value = '';
+                referralType.style.opacity = '0.6';
+            }
+        });
+
+        // Auto-enable/disable follow-up date based on follow-up checkbox
+        document.getElementById('followupRequired').addEventListener('change', function() {
+            const followupDate = document.getElementById('followupDate');
+            if (this.checked) {
+                followupDate.required = true;
+                followupDate.style.opacity = '1';
+            } else {
+                followupDate.required = false;
+                followupDate.value = '';
+                followupDate.style.opacity = '0.6';
+            }
+        });
+
+        // Prevent same primary and secondary complaint
+        document.getElementById('secondaryComplaint').addEventListener('change', function() {
+            const primaryComplaint = document.getElementById('primaryComplaint').value;
+            if (this.value === primaryComplaint && this.value !== '') {
+                alert('Secondary complaint cannot be the same as primary complaint');
+                this.value = '';
+            }
+        });
+    </script>
+</body>
+</html>
